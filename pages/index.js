@@ -8,58 +8,69 @@ import Fetch from 'isomorphic-unfetch';
 
 
 
-export async function getStaticProps() {
-  const allPostsData = getSortedPostsData()
+// export async function getStaticProps() {
+//   const allPostsData = getSortedPostsData()
+  
+//   return {
+//     props: {
+//       allPostsData, color
+//     }
+//   }
+// }
+
+export async function getServerSideProps(context) {
   const date = new Date()
   const year = date.getFullYear()
-  const month = date.getMonth()
+  const month = date.getMonth()+1
   const day = date.getDate()
   const today = year + '/' + month + '/' + day
   const res = await fetch('http://api.jugemkey.jp/api/horoscope/free/' + today);
 
   const data = await res.json();
-  // const a = JSON.parse(JSON.stringify(data))
-  // data.forEach((value) => {
-  //   console.log(value)
-  // })
   
   const result = data.horoscope
-  let color = ''
+  let fortune={};
   for (const [key, valu] of Object.entries(result)) {
     for (const [k, v] of Object.entries(valu)) {
-      console.log(v.sign);
+      console.log(v);
+      
       if (v.sign === '牡羊座') {
-        color = v.color
+        fortune.ishibashi = 
+
+            { 
+              color : v.color,
+              money : v.money,
+              job   : v.job
+            }
+    
+      }
+      if (v.sign === '獅子座') {
+        fortune.furukawa=
+            { 
+              color : v.color,
+              money : v.money,
+              job   : v.job
+            }
       }
     }
   }
-  console.log(Object.keys(result))
- 
-  
+  console.log(fortune.ishibashi)
   return {
     props: {
-      allPostsData, color
+      fortune
     }
   }
 }
 
-// export async function getServerSideProps(context) {
-//   return {
-//     props: {
-//       // props for your component
-//     }
-//   }
-// }
-
-export default function Home({ allPostsData, color }) {
+export default function Home({ fortune }) {
   return (
     <Layout home>
       {/* Keep the existing code here */}
 
       {/* Add this <section> tag below the existing <section> tag */}
-      <section className={`${utilStyles.headingMd} ${utilStyles.padding1px}`}>
-        <h2 className={utilStyles.headingLg}>Blog</h2>
-        <ul className={utilStyles.list}>
+      <section>
+        <h1>中央競馬騎手占い</h1>
+        {/* <ul className={utilStyles.list}>
           {allPostsData.map(({ id, date, title }) => (
             <li className={utilStyles.listItem} key={id}>
               <Link href={`/posts/${id}`}>
@@ -71,9 +82,18 @@ export default function Home({ allPostsData, color }) {
               </small>
             </li>
           ))}
-        </ul>
+        </ul> */}
         <div>
-          本日の石橋脩ラッキー枠：{color}
+          <h2>本日の石橋脩騎手の運勢</h2>
+          <p>仕事運：{fortune.ishibashi.job}</p>
+          <p>金運：{fortune.ishibashi.money}</p>
+          <p>ラッキー枠：{fortune.ishibashi.color}</p>
+        </div>
+        <div>
+          <h2>本日の古川奈穂騎手の運勢</h2>
+          <p>仕事運：{fortune.furukawa.job}</p>
+          <p>金運：{fortune.furukawa.money}</p>
+          <p>ラッキー枠：{fortune.furukawa.color}</p>
         </div>
       </section>
     </Layout>
